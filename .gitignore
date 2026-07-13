@@ -1,0 +1,16 @@
+# dependencies
+node_modules/
+
+# local QA output
+temporary screenshots/
+.playwright-mcp/
+*.local.*
+
+# generated assets (users bring their own)
+assets/vid/
+assets/*.webp
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log

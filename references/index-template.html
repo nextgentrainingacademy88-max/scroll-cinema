@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+  <!-- TODO: page title. Short, browser-tab + SEO title. -->
+  <title>TODO: Page Title - a scroll-cinema experience</title>
+  <!-- TODO: 150-160 char meta description summarizing the scroll journey. -->
+  <meta name="description" content="TODO: one-sentence description of the scroll journey through your four scenes. Mention it is a cinematic scroll-scrubbed demo." />
+
+  <!-- TODO: swap the emoji (&#127916; = clapperboard) for one that fits the brand. -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>&#127916;</text></svg>" />
+
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <!-- Preload ONLY the first scene's poster (the LCP image). Do NOT preload the others. -->
+  <link rel="preload" as="image" href="assets/scene-1-poster.webp" fetchpriority="high">
+
+  <style>
+    :root, .sw-root {
+      --sw-bg: #0A0E16;            /* TODO: page background (dark reads best) */
+      --sw-ink: #F2F5F9;           /* TODO: primary text */
+      --sw-ink-soft: #97A3B6;      /* TODO: secondary text */
+      --sw-accent: #4D7CFF;        /* TODO: global fallback accent; per-scene accent in COPY + sections overrides it */
+      --sw-font-display: "Anton", Impact, "Arial Black", sans-serif;
+      --sw-font-body: "Inter", system-ui, sans-serif;
+    }
+  </style>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="top"></div>
+  <div id="world">
+    <!--
+      data-sw-seo: the CRAWLABLE, no-JS fallback. Answer engines and search bots read THIS
+      block. The scrub engine hides it visually and paints the cinematic layer over the top.
+      Keep it in sync with the COPY array below. Replace every TODO with real prose - one
+      <h2>+<p> per scene, describing the setting, the subject, and how the subject exits
+      toward the next scene (this narrative mirrors the still-to-still camera legs).
+    -->
+    <section data-sw-seo>
+      <h1>TODO: headline (e.g. "Four scenes. One camera.")</h1>
+      <p>TODO: 2-3 sentence intro - what this journey is, who it is for, and what the visitor sees while scrolling through the four scenes. Note it is an AI-generated cinematic scroll demo.</p>
+
+      <h2>TODO: Scene 1 title</h2>
+      <p>TODO: describe scene 1 - the setting, the subject, and how the camera/subject launches toward scene 2.</p>
+
+      <h2>TODO: Scene 2 title</h2>
+      <p>TODO: describe scene 2 - where the subject lands from scene 1 and how it carries on to scene 3.</p>
+
+      <h2>TODO: Scene 3 title</h2>
+      <p>TODO: describe scene 3 and the handoff into the finale.</p>
+
+      <h2>TODO: Scene 4 title (finale)</h2>
+      <p>TODO: describe the finale payoff and the call to action.</p>
+
+      <p><a href="../">TODO: explore-more link (label + href)</a></p>
+      <p>TODO: optional disclaimer (e.g. "Concept demo. All imagery AI-generated.").</p>
+    </section>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="scrub-engine.js"></script>
+  <script src="gsap-copy.js"></script>
+  <script>
+    var world = document.getElementById('world');
+
+    // COPY: single source of truth for the WORDS. The engine runs with copy:false and fires
+    // a 'sw:layout' event carrying each section's px scroll range; the copy layer (gsap-copy.js)
+    // drives word-by-word title reveals + eyebrow/body/tags/CTA, timed so the copy LANDS just
+    // before the subject arrives on screen ("the copy leads the ball"). Each id MUST match the
+    // id in the engine sections[] below.
+    var COPY = [
+      { id: 'scene-1', accent: '#4D7CFF',            // TODO: accent hex (match sections[] accent)
+        eyebrow: 'TODO: eyebrow',                    // TODO: small kicker, e.g. "Location · Chapter"
+        title: 'TODO: Scene 1 Title',                // TODO: 1-3 words; animates word-by-word
+        body: 'TODO: one-line scene 1 body.',        // TODO: single sentence
+        tags: ['TODO: tag A', 'TODO: tag B'] },      // TODO: 0-3 short chips
+      { id: 'scene-2', accent: '#FF5A6E',
+        eyebrow: 'TODO: eyebrow',
+        title: 'TODO: Scene 2 Title',
+        body: 'TODO: one-line scene 2 body.',
+        tags: ['TODO: tag A', 'TODO: tag B'] },
+      { id: 'scene-3', accent: '#FFB703',
+        eyebrow: 'TODO: eyebrow',
+        title: 'TODO: Scene 3 Title',
+        body: 'TODO: one-line scene 3 body.',
+        tags: ['TODO: tag A', 'TODO: tag B'] },
+      { id: 'scene-4', accent: '#FFD75E',            // finale
+        eyebrow: 'TODO: finale eyebrow',
+        title: 'TODO: Finale Title',
+        body: 'TODO: one-line finale payoff.',
+        tags: ['TODO: tag A', 'TODO: tag B'],
+        // TODO: finale CTA - primary is the main action; secondary is optional (drop it if unused).
+        cta: { primary: { label: 'TODO: Primary CTA', href: '#top' },
+               secondary: { label: 'TODO: Secondary CTA', href: '../' } } },
+    ];
+
+    // Mount the copy layer FIRST so its sw:layout listener is ready before the engine fires
+    // the event on mount.
+    mountCopyLayer(world, { sections: COPY });
+
+    mountScrollWorld(world, {
+      brand: { name: 'TODO: BRAND', href: '#top' },   // TODO: top-left wordmark
+      cta: { label: 'TODO: nav CTA', href: '../' },   // TODO: top-right nav link
+      hint: 'TODO: scroll hint',                      // TODO: e.g. "scroll to follow the camera"
+      copy: false,                                    // copy owned by mountCopyLayer above - leave false
+      diveScroll: 1.6,   // scroll length (vh multiples) of the dive INTO each scene
+      connScroll: 0.9,   // scroll length of the connector flight BETWEEN scenes
+      crossfade: 0.08,   // seam crossfade fraction between a clip and the next still
+      // sections: VISUAL/ASSET props only (words live in COPY). One entry per scene, in order.
+      // Still-to-still Kling legs: leg i is rendered --start-image still_i, --end-image still_{i+1},
+      // so legs are independent and render in PARALLEL with frame-perfect seams.
+      //   still                   = approved still frame for this scene (the pinned leg endpoint)
+      //   poster / clip           = desktop poster image + rendered camera clip for this leg
+      //   posterMobile / clipMobile = lighter mobile-tier assets (engine picks by viewport)
+      //   scroll / linger         = per-scene scroll length + hold at the landing frame
+      sections: [
+        { id: 'scene-1', label: 'TODO: Scene 1', still: 'assets/scene-1.webp', poster: 'assets/scene-1-poster.webp', posterMobile: 'assets/scene-1-poster-m.webp', clip: 'assets/vid/scene-1.mp4', clipMobile: 'assets/vid/scene-1-m.mp4', accent: '#4D7CFF', scroll: 1.8, linger: 0.4 },
+        { id: 'scene-2', label: 'TODO: Scene 2', still: 'assets/scene-2.webp', poster: 'assets/scene-2-poster.webp', posterMobile: 'assets/scene-2-poster-m.webp', clip: 'assets/vid/scene-2.mp4', clipMobile: 'assets/vid/scene-2-m.mp4', accent: '#FF5A6E', scroll: 1.6, linger: 0.35 },
+        { id: 'scene-3', label: 'TODO: Scene 3', still: 'assets/scene-3.webp', poster: 'assets/scene-3-poster.webp', posterMobile: 'assets/scene-3-poster-m.webp', clip: 'assets/vid/scene-3.mp4', clipMobile: 'assets/vid/scene-3-m.mp4', accent: '#FFB703', scroll: 1.6, linger: 0.35 },
+        { id: 'scene-4', label: 'TODO: Finale', still: 'assets/scene-4.webp', poster: 'assets/scene-4-poster.webp', posterMobile: 'assets/scene-4-poster-m.webp', clip: 'assets/vid/scene-4.mp4', clipMobile: 'assets/vid/scene-4-m.mp4', accent: '#FFD75E', scroll: 2.0, linger: 0.5 },
+      ],
+      connectors: [],  // Keep empty for still-to-still (architecture A): each leg already lands on the
+                       // next scene, so consecutive clips crossfade directly - no separate connector clips.
+    });
+  </script>
+</body>
+</html>
