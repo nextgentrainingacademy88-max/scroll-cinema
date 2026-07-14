@@ -203,7 +203,8 @@ ffmpeg -y -ss 0 -i vid/<name>-m.mp4 -frames:v 1 -c:v libwebp -quality 82 img/<na
 ```
 
 Wire both tiers into the scene manifest as `clip`/`poster` (desktop) and `clipMobile`/
-`posterMobile` (mobile); the engine picks per viewport. Encode the mobile tier FROM the
+`posterMobile` (mobile); the engine loads the mobile tier ONLY on save-data / slow networks -
+every device gets the full-res master by default. Encode the mobile tier FROM the
 already-trimmed 1080p master so the seams carry over for free.
 
 ---

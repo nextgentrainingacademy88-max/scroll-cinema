@@ -126,7 +126,10 @@ Per [pipeline.md](references/pipeline.md):
   the **SSIM seam gate** (>= 0.90 pass; 0.75-0.90 eyeball - the crossfade `0.08` covers cloud/
   confetti metric noise).
 - **Posters** from each ENCODED clip's first frame (so the still->video swap is pixel-identical).
-- **720p mobile tier** (`-g 4`, ~40-55% smaller) wired as `clipMobile`/`posterMobile`.
+- **720p mobile tier** (`-g 4`, ~40-55% smaller) wired as `clipMobile`/`posterMobile` - kept as a
+  **save-data / slow-network fallback only**. By default every device (incl. high-DPI phones) gets
+  the full-res 1080p master for clarity; the engine drops to the mobile tier only on `save-data` or
+  2-3G. Still generate it.
 
 ---
 
@@ -141,6 +144,12 @@ Copy `references/scrub-engine.js` + `references/gsap-copy.js` next to a page bui
   `mountScrollWorld(container, { copy:false, sections, ... })`.
 - Copy data (eyebrow/title/body/tags/CTA/accent) lives in one `COPY` array; engine config carries
   only visual/asset props (still/poster/clip + mobile variants, accent, scroll, linger).
+- **Per-scene copy placement.** Give each `COPY` entry a `pos:{ h:'left'|'right', v:'top'|'upper'|'mid' }`
+  so the words sit BESIDE that scene's subject (in the open half of the frame), biased high, and
+  alternate sides as the subject moves. There is **no dark panel** behind the copy - legibility is a
+  text-shadow on the glyphs, so the film stays fully visible; don't add a scrim back. On phones the
+  anchor auto-varies per scene and every block (finale title + CTAs included) stays **above the fold**
+  (down to 375x667 and landscape); that mobile headroom rule keys off `id:"finale"` on the last scene.
 - Put a plain-markup `data-sw-seo` block inside the container for crawlers/no-JS (the hero title
   as `h1`, one `h2`+`p` per scene). The engine hides it on mount.
 
@@ -204,7 +213,8 @@ screenshot scripts, node_modules).
   transform (the copy layer uses `clearProps:'transform'` before rebuilding).
 - **Re-fire on resize.** The engine re-fires `sw:layout` on relayout; the copy layer kills and
   rebuilds its ScrollTriggers each time - keep that (don't cache stale px ranges).
-- **Mobile = lighter assets, same animation.** The tiers only change which files load; phones
-  still get the full scroll.
+- **Full-res everywhere; mobile tier = fallback.** Phones get the 1080p master by default (the 720p
+  `-m` tier loads only on save-data / slow networks). The tiers only change which files load; the
+  animation + full scroll are identical.
 - **Kling specifics:** `--sound off` required; no `--resolution`; `--mode pro` = 1080p; outputs
   need normalizing to 1920x1080.

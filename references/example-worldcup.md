@@ -62,23 +62,23 @@ runs `copy:false` and never renders text):
 
 ```js
 var COPY = [
-  { id:'france',    accent:'#4D7CFF', eyebrow:'Paris · Semifinal',
+  { id:'france',    accent:'#4D7CFF', pos:{ h:'left',  v:'top'   }, eyebrow:'Paris · Semifinal',
     title:'Struck Skyward',
     body:'Beneath the glowing tower, Mbappe gathers in royal blue and strikes it high into the Paris dusk.',
     tags:['Mbappe · No.10','France vs Spain'] },
-  { id:'england',   accent:'#FF5A6E', eyebrow:'Wembley · Semifinal',
+  { id:'england',   accent:'#FF5A6E', pos:{ h:'right', v:'upper' }, eyebrow:'Wembley · Semifinal',
     title:'It Falls to Kane',
     body:"Out of the red-and-white smoke under Wembley's arch, Kane meets it first-time and volleys it onward.",
     tags:['Kane · No.9','Argentina vs England'] },
-  { id:'spain',     accent:'#FFB703', eyebrow:'Madrid · Semifinal',
+  { id:'spain',     accent:'#FFB703', pos:{ h:'left',  v:'top'   }, eyebrow:'Madrid · Semifinal',
     title:'Over the Wall',
     body:'A fearless teenager in red outsprints the bull across golden sand and flicks it over the wall.',
     tags:['No.19 · The Kid','France vs Spain'] },
-  { id:'argentina', accent:'#7EC8E3', eyebrow:'Buenos Aires · Semifinal',
+  { id:'argentina', accent:'#7EC8E3', pos:{ h:'right', v:'upper' }, eyebrow:'Buenos Aires · Semifinal',
     title:'Home to Messi',
     body:'Golden hour on a Buenos Aires street, Messi gathers it on the run beneath a giant flag.',
     tags:['Messi · No.10','Argentina vs England'] },
-  { id:'finale',    accent:'#FFD75E', eyebrow:'The Final Four',
+  { id:'finale',    accent:'#FFD75E', pos:{ h:'left',  v:'top'   }, eyebrow:'The Final Four',
     title:'Four Chase One',
     body:'Four rivals shoulder to shoulder on the center circle, flags flying, facing the trophy only one can lift.',
     tags:['Semis · 14-15 July','Four rivals, one prize'],
@@ -86,6 +86,18 @@ var COPY = [
           secondary:{ label:'How this was made', href:'../#guide' } } },
 ];
 ```
+
+### Copy sits beside the subject
+
+`pos:{ h, v }` puts each scene's copy in the OPEN half of that frame, next to the moving subject,
+biased high: France is top-left (Mbappe is centre-right), England upper-right (Kane is centre),
+Spain top-left (the bull is on the right), Argentina upper-right (the flag is on the left), the
+finale top-left. So the words follow the camera scene-to-scene instead of sitting in one fixed
+spot. There is **no dark panel behind the copy** - legibility is a text-shadow on the glyphs, so
+the footage stays fully visible edge to edge. On phones the copy auto-varies its vertical anchor
+per scene and every block - the finale's title + two CTAs included - is kept **above the fold**,
+down to a 375x667 phone and in landscape. Every device gets the full-res 1080p master; the
+lighter `-m.mp4` tier loads only on save-data / slow networks.
 
 ### The copy leads the ball
 

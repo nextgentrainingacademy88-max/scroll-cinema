@@ -193,10 +193,10 @@ Known intentional choices (NOT bugs): <CDN ok / no hydration / exact CTA label +
 `
 
 const DIMENSIONS = [
-  { key: 'accessibility', lens: 'ACCESSIBILITY (WCAG): contrast over scrim, focus-visible on all interactive els, keyboard operability, aria/labels on icon-only controls, heading order, reduced-motion correctness, touch targets >=44px.' },
+  { key: 'accessibility', lens: 'ACCESSIBILITY (WCAG): text contrast over the footage (legibility is per-glyph text-shadow, no scrim), focus-visible on all interactive els, keyboard operability, aria/labels on icon-only controls, heading order, reduced-motion correctness, touch targets >=44px.' },
   { key: 'motion-perf',   lens: 'MOTION & PERFORMANCE: ScrollTrigger rebuilt cleanly on sw:layout/resize (no leaks/dupes), only transform/opacity animated, fromTo immediateRender flashes at load/seams, hero intro runs once, text not stuck hidden if CDN slow/fails.' },
   { key: 'copy',          lens: 'COPY & FACTUAL COHERENCE: titles read as one arc, no fabricated stats/quotes, eyebrow/body/tags match each scene, SEO block matches visible copy, typos, banned em-dash.' },
-  { key: 'mobile',        lens: 'MOBILE ROBUSTNESS: copy layer positions at <=860px (bottom-anchored, safe-area), title clamp sane, CTAs tappable, scrim keeps text legible over bright video, no overflow-x.' },
+  { key: 'mobile',        lens: 'MOBILE ROBUSTNESS: copy layer positions at <=860px (per-scene vertical anchor varies + every block stays above the fold, safe-area), title clamp sane, CTAs tappable, per-glyph text-shadow keeps copy legible over bright video (no dark panel), no overflow-x.' },
   { key: 'markup',        lens: 'MARKUP & INTEGRITY: valid HTML, no duplicate IDs, copy escaping, sw:layout event contract matches producer/consumer, no dead config, graceful fallback when window.gsap missing.' },
 ]
 

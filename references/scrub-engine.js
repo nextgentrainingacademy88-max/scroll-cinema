@@ -41,10 +41,10 @@
    MOBILE (the clipMobile/connectorsMobile variants are the opt-in mobile tiers;
    the rest of the phone handling below is always on)
      Two independent axes, deliberately separate:
-     - CLIP TIER (which file): decided by device class — screen short side ≤600 CSS px
-       = phone → `clipMobile`/`posterMobile`; tablets (iPad Pro included) and desktops
-       get the full master. NOT decided by pointer type: iPadOS reports a coarse
-       pointer and a Mac UA, but has a desktop-class screen + decoder.
+     - CLIP TIER (which file): decided by CONNECTION, not device class. Every device
+       (incl. high-DPI phones) gets the full-res master by default; the lighter
+       `clipMobile`/`posterMobile` tier loads ONLY on a constrained connection
+       (save-data / slow network) - see `dataLite` in the code below.
      - BEHAVIOUR hardening (how it acts): on any coarse-pointer / ≤860px viewport the
        engine coalesces seeks (never issues a new currentTime while the decoder is
        still `seeking` — fast flicks can't pile up and freeze), takes a coarser seek
@@ -95,17 +95,20 @@ function mountScrollWorld(container, config) {
   const coarse = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
   const smallMQ = window.matchMedia('(max-width: 860px)');
   const isMobile = () => coarse || smallMQ.matches;
-  // CLIP TIER keys off device class, NOT input type: an iPad Pro is coarse-pointer but
-  // has a desktop-class screen and decoder — it gets the 1080p master, with the touch
-  // hardening above still on. screen.* is stable across rotation and window resizes;
-  // a phone's short side is ≤ ~500 CSS px, tablets start at 744.
-  const phoneClass = Math.min(screen.width, screen.height) <= 600;
+  // CLIP TIER now keys off CONNECTION, not device class: every device (incl. high-DPI
+  // phones) gets the full-res 1080p master for clarity; the lighter mobile encode is kept
+  // only as a save-data / slow-network fallback (see dataLite below). The touch behaviour
+  // hardening still keys off input type + viewport via isMobile().
   // Network signals are Chromium-only (iOS/Safari/Firefox expose nothing) — treat them
   // strictly as a *downgrade* signal on top of a conservative default, never as a gate
   // for the good experience.
   const conn = navigator.connection;
   const dataSaver = !!(conn && conn.saveData);
   const slowNet = !!(conn && /^(slow-2g|2g|3g)$/.test(conn.effectiveType || ''));
+  // Clarity: serve the full-res 1080p master EVERYWHERE (incl. high-DPI phones, where the
+  // 720p tier looks soft). Only drop to the lighter mobile encode when the connection is
+  // actually constrained - the engine's seek coalescing keeps 1080p scrubbing smooth.
+  const dataLite = slowNet || dataSaver;
   // Stills mode: the page becomes the stills cross-dissolving as you scroll — no video
   // load, no decode. Entered up-front for prefers-reduced-motion and data-saver, and at
   // runtime when iOS Low Power Mode blocks video (see enterStillsMode/primeVideo).
@@ -187,7 +190,7 @@ function mountScrollWorld(container, config) {
     // so the still→video swap can't pop) — matching the encode the device will get.
     // In stills mode the clip never loads, so the higher-fidelity source still is the
     // better permanent image.
-    const pref = phoneClass ? (s.posterM || s.poster) : s.poster;
+    const pref = (dataLite && s.posterM) ? s.posterM : s.poster;
     const posterSrc = (!stillsOnly && pref) ? pref : s.still;
     if (posterSrc) img.src = posterSrc;
     scene.appendChild(img); stage.appendChild(scene);
@@ -201,6 +204,9 @@ function mountScrollWorld(container, config) {
   // NO copy, but still fires `sw:layout` with each section's scroll range so the external
   // layer can sync exactly. Route dots + nav stay (they're navigation, not copy).
   const ownCopy = config.copy !== false;
+  // When an external layer owns the copy (copy:false), the engine's copylayer stays empty -
+  // suppress its legibility panel so it never darkens the film behind the external copy.
+  if (!ownCopy) copylayer.classList.add('sw-copylayer--empty');
   const copies = [], dots = [];
   SECTIONS.forEach((s, i) => {
     if (ownCopy) {
@@ -278,9 +284,9 @@ function mountScrollWorld(container, config) {
   function loadClip(s) {
     if (stillsOnly || s.loading || !s.clip) return;
     s.loading = true;
-    // Serve the lighter mobile encode on phone-class devices when one was provided
-    // (tablets and desktops get the full master — see phoneClass above).
-    const url = (phoneClass && s.clipM) ? s.clipM : s.clip;
+    // Serve the full-res master by default; only use the lighter mobile encode when the
+    // connection is constrained (save-data / slow network), see dataLite above.
+    const url = (dataLite && s.clipM) ? s.clipM : s.clip;
     fetch(url).then(r => r.ok ? r.blob() : Promise.reject(new Error('404')))
       .then(blob => {
         const v = document.createElement('video');
@@ -353,7 +359,7 @@ function mountScrollWorld(container, config) {
   }
 
   function raf() {
-    const eps = isMobile() ? 0.02 : 0.008;   // coarser seek step on phones = fewer decodes
+    const eps = isMobile() ? 0.02 : 0.005;   // finer seek step on desktop = smoother scrub; coarser on phones = fewer decodes
     for (let i = 0; i < NSEG; i++) {
       const s = SEGMENTS[i];
       if (!s.hasClip || !s.ready || !s.video) continue;
@@ -472,6 +478,7 @@ function injectCSS() {
   .sw-scene__still{will-change:transform;} .sw-scene.has-clip .sw-scene__still{opacity:0;} .sw-scene__video{z-index:1;}
   .sw-copylayer{position:fixed;inset:0;z-index:20;pointer-events:none;}
   .sw-copylayer::before{content:"";position:absolute;inset:0;width:min(58vw,780px);background:linear-gradient(90deg,var(--sw-bg) 0%,color-mix(in srgb,var(--sw-bg) 82%,transparent) 34%,color-mix(in srgb,var(--sw-bg) 40%,transparent) 62%,transparent 100%);}
+  .sw-copylayer--empty::before{content:none;}
   .sw-copy{position:absolute;left:clamp(18px,5vw,64px);top:50%;transform:translateY(-50%);width:min(42vw,460px);opacity:0;will-change:opacity,transform;}
   .sw-copy__num{font-family:ui-monospace,Menlo,monospace;font-size:.74rem;letter-spacing:.12em;color:var(--sw-ink-soft);}
   .sw-copy__eyebrow{display:block;margin-top:18px;font-family:var(--sw-font-display);font-weight:700;font-size:.8rem;letter-spacing:.16em;text-transform:uppercase;color:var(--sw-accent);}

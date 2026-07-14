@@ -27,6 +27,10 @@ A repeatable pipeline for the whole thing, plus the two reusable engines that po
    video, and timed so **the copy leads the ball**.
 3. **Quality workflows.** A multi-agent copy panel (diverse drafts to synthesis) and an adversarial
    QA pass (review then verify each finding) so what you ship is tight.
+4. **Copy that sits beside the subject.** Each scene places its headline in the open half of the frame
+   next to the moving subject (`pos:{h,v}`, biased high, alternating sides), over **fully-visible
+   footage** - no dark box; legibility is a text-shadow on the glyphs. Phones get the full-res 1080p
+   master, and every block (finale CTAs included) stays above the fold.
 
 Both engines are self-contained vanilla JS (no framework, no build step) - they drop into plain
 HTML, Next.js, Vue, anything.

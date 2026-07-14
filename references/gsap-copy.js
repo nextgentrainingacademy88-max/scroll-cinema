@@ -37,7 +37,13 @@ function mountCopyLayer(container, cfg) {
 
   const blocks = SECTIONS.map((s, i) => {
     const art = document.createElement('article');
-    art.className = 'wc-copy';
+    // Per-scene placement: pos.h left|right, pos.v top|upper|mid. Default upper-left.
+    // The block sits BESIDE the subject (in the open half of the frame) so the copy moves
+    // scene-to-scene with the camera instead of sitting in one fixed spot.
+    const pos = s.pos || {};
+    const h = pos.h === 'right' ? 'right' : 'left';
+    const v = (pos.v === 'top' || pos.v === 'mid') ? pos.v : 'upper';
+    art.className = `wc-copy wc-h-${h} wc-v-${v}`;
     art.dataset.id = s.id || ('s' + i);
     art.style.setProperty('--wc-accent', s.accent || '#4D7CFF');
     art.innerHTML =
@@ -177,32 +183,41 @@ function injectCopyCSS() {
   if (document.getElementById('wc-css')) return;
   const css = `
   .wc-copylayer{position:fixed;inset:0;z-index:22;pointer-events:none;}
-  .wc-scrim{position:absolute;inset:0;width:min(66vw,940px);
-    background:linear-gradient(90deg,color-mix(in srgb,var(--sw-bg,#0A0E16) 96%,transparent) 0%,
-      color-mix(in srgb,var(--sw-bg,#0A0E16) 82%,transparent) 34%,
-      color-mix(in srgb,var(--sw-bg,#0A0E16) 46%,transparent) 66%,transparent 100%);}
-  .wc-copy{position:absolute;left:clamp(20px,5.2vw,72px);top:50%;transform:translateY(-50%);
-    width:min(48vw,620px);max-width:620px;transform-origin:left center;}
+  /* Light top-only vignette so the fixed navbar stays legible; NO full veil - the film
+     must stay clear. Bottom protection for phone copy is added in the mobile block below. */
+  .wc-scrim{position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(180deg,color-mix(in srgb,var(--sw-bg,#0A0E16) 42%,transparent) 0%,
+      transparent 13%,transparent 100%);}
+  .wc-copy{position:absolute;display:flex;flex-direction:column;width:min(46vw,600px);max-width:600px;}
+  /* No dark panel/halo behind the copy - legibility comes from text-shadow on the glyphs
+     themselves (below), so the film stays fully visible edge to edge. */
+  .wc-h-left{left:clamp(20px,5.2vw,72px);align-items:flex-start;text-align:left;transform-origin:left center;}
+  .wc-h-right{right:clamp(44px,6vw,96px);align-items:flex-end;text-align:right;transform-origin:right center;}
+  .wc-h-right .wc-tags,.wc-h-right .wc-cta{justify-content:flex-end;}
+  .wc-v-top{top:clamp(94px,12vh,132px);}
+  .wc-v-upper{top:clamp(112px,17vh,190px);}
+  .wc-v-mid{top:clamp(150px,30vh,300px);}
   .wc-num{display:inline-flex;align-items:center;gap:.4em;font-family:ui-monospace,"SF Mono",Menlo,monospace;
-    font-size:.82rem;letter-spacing:.28em;color:var(--sw-ink-soft,#97A3B6);}
+    font-size:.82rem;letter-spacing:.28em;color:color-mix(in srgb,var(--sw-ink,#F2F5F9) 78%,var(--sw-ink-soft,#97A3B6));
+    text-shadow:0 1px 3px rgba(0,0,0,.6),0 1px 12px rgba(0,0,0,.4);}
   .wc-num i{font-style:normal;opacity:.5;}
   .wc-eyebrow{display:block;margin-top:20px;font-family:var(--sw-font-body,Inter),system-ui,sans-serif;
     font-weight:700;font-size:.82rem;letter-spacing:.34em;text-transform:uppercase;
-    color:var(--wc-accent,#4D7CFF);}
+    color:var(--wc-accent,#4D7CFF);text-shadow:0 1px 3px rgba(0,0,0,.72),0 0 10px rgba(0,0,0,.45);}
   .wc-title{margin:14px 0 0;font-family:var(--sw-font-display,"Anton"),Impact,sans-serif;font-weight:400;
     text-transform:uppercase;color:var(--sw-ink,#F2F5F9);
     font-size:clamp(3rem,7.6vw,7.6rem);line-height:.9;letter-spacing:-.006em;
-    text-shadow:0 6px 40px color-mix(in srgb,var(--sw-bg,#0A0E16) 62%,transparent);}
+    text-shadow:0 2px 3px rgba(0,0,0,.5),0 4px 30px rgba(0,0,0,.5);}
   .wc-wmask{display:inline-block;overflow:hidden;vertical-align:top;padding:0 .015em;}
   .wc-w{display:inline-block;will-change:transform,opacity;}
   .wc-body{margin-top:22px;font-family:var(--sw-font-body,Inter),system-ui,sans-serif;
     font-size:clamp(1.05rem,1.35vw,1.28rem);line-height:1.5;max-width:34ch;
-    color:color-mix(in srgb,var(--sw-ink,#F2F5F9) 84%,var(--sw-ink-soft,#97A3B6));
-    text-shadow:0 1px 16px color-mix(in srgb,var(--sw-bg,#0A0E16) 88%,transparent);}
+    color:color-mix(in srgb,var(--sw-ink,#F2F5F9) 96%,var(--sw-ink-soft,#97A3B6));
+    text-shadow:0 1px 2px rgba(0,0,0,.82),0 1px 12px rgba(0,0,0,.55);}
   .wc-tags{list-style:none;display:flex;flex-wrap:wrap;gap:9px;margin:26px 0 0;padding:0;}
   .wc-tags li{font-family:var(--sw-font-body,Inter),system-ui,sans-serif;font-size:.84rem;font-weight:600;
     color:color-mix(in srgb,var(--wc-accent,#4D7CFF) 45%,#fff);padding:8px 15px;border-radius:999px;
-    background:color-mix(in srgb,var(--sw-bg,#0A0E16) 60%,transparent);
+    background:color-mix(in srgb,var(--sw-bg,#0A0E16) 72%,transparent);
     border:1px solid color-mix(in srgb,var(--wc-accent,#4D7CFF) 55%,transparent);
     text-shadow:0 1px 10px color-mix(in srgb,var(--sw-bg,#0A0E16) 85%,transparent);
     backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);}
@@ -219,18 +234,30 @@ function injectCopyCSS() {
   .wc-btn--ghost:hover{transform:translateY(-3px);border-color:color-mix(in srgb,var(--sw-ink,#F2F5F9) 60%,transparent);}
   .wc-btn:focus-visible{outline:3px solid color-mix(in srgb,var(--wc-accent,#4D7CFF) 80%,#fff);outline-offset:3px;}
   @media (max-width:860px){
-    .wc-scrim{width:100%;height:66%;top:auto;bottom:0;
-      background:linear-gradient(0deg,var(--sw-bg,#0A0E16) 6%,color-mix(in srgb,var(--sw-bg,#0A0E16) 74%,transparent) 44%,transparent 100%);}
-    .wc-copy{left:clamp(18px,6vw,40px);right:clamp(18px,6vw,40px);top:auto;bottom:clamp(60px,13vh,120px);
-      transform:none;width:auto;max-width:none;}
-    .wc-copy{bottom:calc(clamp(54px,12dvh,110px) + env(safe-area-inset-bottom));}
+    /* Phones: full-width copy, but the vertical anchor VARIES per scene (top-scenes sit
+       higher, upper-scenes lower) so it isn't jammed in the same low spot every time. A
+       light bottom fade only - no dark panel behind the text (legibility is on the glyphs). */
+    .wc-scrim{background:linear-gradient(0deg,color-mix(in srgb,var(--sw-bg,#0A0E16) 60%,transparent) 0%,color-mix(in srgb,var(--sw-bg,#0A0E16) 20%,transparent) 42%,transparent 78%);}
+    .wc-copy.wc-h-left,.wc-copy.wc-h-right{left:clamp(18px,6vw,40px);right:clamp(18px,6vw,40px);
+      width:auto;max-width:none;align-items:flex-start;text-align:left;transform-origin:left center;}
+    .wc-copy.wc-v-top{top:auto;bottom:calc(clamp(96px,20dvh,200px) + env(safe-area-inset-bottom));}
+    .wc-copy.wc-v-upper{top:auto;bottom:calc(clamp(60px,12dvh,120px) + env(safe-area-inset-bottom));}
+    .wc-copy.wc-v-mid{top:auto;bottom:calc(clamp(52px,10dvh,104px) + env(safe-area-inset-bottom));}
+    /* Finale adds the CTA pair (tallest block) - keep it low for max headroom so it always
+       clears the fold, even though its scene is tagged v-top. */
+    .wc-copy[data-id="finale"]{bottom:calc(clamp(44px,9dvh,92px) + env(safe-area-inset-bottom));}
+    .wc-h-right .wc-tags,.wc-h-right .wc-cta{justify-content:flex-start;}
     .wc-title{font-size:clamp(2.6rem,12vw,4.4rem);line-height:.92;}
     .wc-body{max-width:none;font-size:clamp(1rem,4vw,1.14rem);}
     .wc-cta{gap:10px;}.wc-btn{font-size:.95rem;padding:15px 24px;}
   }
-  /* Short phones (and landscape): the finale is the tallest block; keep it inside the scrim. */
+  /* Short phones (and landscape): the finale is the tallest block; keep it inside the fold. */
   @media (max-width:860px) and (max-height:730px){
-    .wc-copy{bottom:calc(clamp(36px,7dvh,64px) + env(safe-area-inset-bottom));}
+    /* Short phones + landscape: headroom is scarce, so pin every block low and shrink it -
+       above-the-fold wins over per-scene variation here (specificity matches the mobile
+       per-class anchors above, and this block is later, so it takes over). */
+    .wc-copy.wc-v-top,.wc-copy.wc-v-upper,.wc-copy.wc-v-mid,.wc-copy[data-id="finale"]{
+      bottom:calc(clamp(28px,6dvh,56px) + env(safe-area-inset-bottom));}
     .wc-title{font-size:clamp(2.1rem,9.5vw,3.2rem);}
     .wc-body{font-size:clamp(.92rem,3.4vw,1.02rem);margin-top:12px;}
     .wc-tags{margin-top:14px;}.wc-cta{margin-top:18px;}

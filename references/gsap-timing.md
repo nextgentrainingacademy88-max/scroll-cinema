@@ -43,7 +43,7 @@ Because the engine re-fires on resize and `build()` kills its old triggers first
 
 ## 3. What `mountCopyLayer` builds
 
-For each configured section it creates one `<article class="wc-copy">` inside a fixed, `pointer-events:none` overlay (`.wc-copylayer`, `z-index:22`) with a left-edge readability scrim. Structure per block: `.wc-num` (`01 / 05`), `.wc-eyebrow`, `.wc-title` (`<h1>` for section 0, else `<h2>`), `.wc-body`, `.wc-tags li`, `.wc-cta`. Only `.wc-cta` re-enables `pointer-events:auto`, so links are clickable but the rest never blocks the scroll surface.
+For each configured section it creates one `<article class="wc-copy">` inside a fixed, `pointer-events:none` overlay (`.wc-copylayer`, `z-index:22`). There is no dark panel behind the copy - legibility is a text-shadow on the glyphs themselves, with only a light top-only vignette to keep the navbar legible. Structure per block: `.wc-num` (`01 / 05`), `.wc-eyebrow`, `.wc-title` (`<h1>` for section 0, else `<h2>`), `.wc-body`, `.wc-tags li`, `.wc-cta`. Only `.wc-cta` re-enables `pointer-events:auto`, so links are clickable but the rest never blocks the scroll surface.
 
 ### The word-mask split (the reveal primitive)
 
