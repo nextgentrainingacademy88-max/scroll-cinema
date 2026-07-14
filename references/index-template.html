@@ -25,7 +25,29 @@
       --sw-font-display: "Anton", Impact, "Arial Black", sans-serif;
       --sw-font-body: "Inter", system-ui, sans-serif;
     }
+    /* Anti-FOUC: the engine only hides [data-sw-seo] AFTER it mounts (GSAP loads from a CDN
+       first), so on a cold load the raw fallback copy flashes as unstyled serif text. These
+       rules hide it during boot while leaving it in the DOM for crawlers. The .sw-booting class
+       is added by JS below, so no-JS visitors never match it and read the fallback plainly. */
+    html { background: #0A0E16; }   /* match --sw-bg; kills the white flash before the dark layer paints */
+    html.sw-booting [data-sw-seo] {
+      position: fixed; top: 0; left: 0;
+      width: 1px; height: 1px; overflow: hidden;
+      clip: rect(0 0 0 0); clip-path: inset(50%);
+      white-space: nowrap; opacity: 0; pointer-events: none;
+    }
+    /* If the engine never mounts (CDN/JS failure), the fallback shows on-brand, not raw serif. */
+    [data-sw-seo] { color: #F2F5F9; font-family: "Inter", system-ui, sans-serif; max-width: 760px; margin: 40px auto; padding: 0 22px; line-height: 1.6; }
+    [data-sw-seo] h1, [data-sw-seo] h2 { font-family: "Anton", Impact, "Arial Black", sans-serif; letter-spacing: .01em; }
   </style>
+  <script>
+    // Flag the page as booting immediately so the critical CSS above hides the static fallback
+    // copy from first paint (no unstyled-serif flash). Safety net: if the engine has not taken
+    // over within 8s (e.g. the GSAP CDN is blocked), drop the class so the fallback becomes
+    // readable rather than leaving a blank page. On success the engine hides [data-sw-seo] itself.
+    document.documentElement.className += ' sw-booting';
+    setTimeout(function () { document.documentElement.classList.remove('sw-booting'); }, 8000);
+  </script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
